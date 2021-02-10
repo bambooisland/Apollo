@@ -1,7 +1,6 @@
 package io.github.bambooisland.apollo;
 
 import java.awt.SplashScreen;
-import java.io.File;
 import java.io.IOException;
 
 import javafx.application.Application;
@@ -16,7 +15,7 @@ public class Main extends Application {
 	@Override
 	public void start(Stage stage) {
 		try {
-			FXMLLoader loader = new FXMLLoader(new File("GUI/main.fxml").toURI().toURL());
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
 			Parent root = loader.load();
 			stage.setScene(new Scene(root));
 			con = loader.getController();
