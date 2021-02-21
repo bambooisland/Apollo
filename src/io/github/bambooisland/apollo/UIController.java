@@ -46,109 +46,111 @@ public class UIController implements Initializable {
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		try {
-			table = PoiTable.getTable(new File("data/list.xlsx"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		songs = new ApolloSong[table.getNumberOfElements()];
-		for (int i = 0; i < table.getNumberOfElements(); i++) {
-			Element ele = table.getElement(i);
-			songs[i] = new ApolloSong(
-					ele.getField(0).getValue(), ele.getField(1).getValue(), ele.getField(2).getValue(),
-					ele.getField(3).getValue(), ele.getField(4).getValue()
-			);
-		}
-		
-		Extractor ex = Extractor.getExtractor(table);
-		
-		ObservableList<String> list_tab1 = FXCollections.observableArrayList();
-		for (String s : ex.getAllKindsOfValues(0)) {
-			list_tab1.add(s);
-		}
-		Collections.sort(list_tab1, (str1, str2) -> {
-			String cache1 = str1;
-			String cache2 = str2;
-			if (str1.toLowerCase().startsWith("the ")) {
-				cache1 = str1.substring(4);
+		new Thread( () -> {
+			try {
+				table = PoiTable.getTable(new File("data/list.xlsx"));
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			if (str2.toLowerCase().startsWith("the ")) {
-				cache2 = str2.substring(4);
+			songs = new ApolloSong[table.getNumberOfElements()];
+			for (int i = 0; i < table.getNumberOfElements(); i++) {
+				Element ele = table.getElement(i);
+				songs[i] = new ApolloSong(
+						ele.getField(0).getValue(), ele.getField(1).getValue(), ele.getField(2).getValue(),
+						ele.getField(3).getValue(), ele.getField(4).getValue()
+				);
 			}
-			return Collator.getInstance().compare(cache1, cache2);
-		});
-		this.artistList_tab1.setItems(list_tab1);
-		this.artistList_tab3.setItems(list_tab1);
-		
-		ObservableList<String> list_tab2 = FXCollections.observableArrayList();
-		for (String s : ex.getAllKindsOfValues(1)) {
-			list_tab2.add(s);
-		}
-		Collections.sort(list_tab2);
-		this.albumList_tab2.setItems(list_tab2);
-		
-		ObservableList<ApolloSong> list_tab4 = FXCollections.observableArrayList();
-		for (ApolloSong song : songs) {
-			list_tab4.add(song);
-		}
-		Collections.sort(list_tab4, (song1, song2) -> {
-			return Collator.getInstance().compare(song1.getTitle(), song2.getTitle());
-		});
-		this.songList_tab4.setItems(list_tab4);
-		
-		titleLabel.textProperty().bind(PlayerManager.currentSongTitleProperty());
-		Tooltip tooltip = new Tooltip();
-		tooltip.textProperty().bind(titleLabel.textProperty());
-		titleLabel.setTooltip(tooltip);
-		
-		artistLabel.textProperty().bind(PlayerManager.currentSongArtistProperty());
-		tooltip = new Tooltip();
-		tooltip.textProperty().bind(artistLabel.textProperty());
-		artistLabel.setTooltip(tooltip);
-		
-		albumLabel.textProperty().bind(PlayerManager.currentSongAlbumProperty());
-		tooltip = new Tooltip();
-		tooltip.textProperty().bind(albumLabel.textProperty());
-		albumLabel.setTooltip(tooltip);
-		
-		rangeSlider.lowValueProperty().addListener( (value, oldValue, newValue) -> {
-			PlayerManager.setStartTime(newValue.doubleValue());
-		});
-		rangeSlider.highValueProperty().addListener( (value, oldValue, newValue) -> {
-			PlayerManager.setStopTime(newValue.doubleValue());
-		});
-		
-		playListView.itemsProperty().bind(PlayerManager.playListProperty());
-		
-		numberOfMusicLabel.setText(
-			ex.getAllKindsOfValues(0).length + "人のアーティスト "
-					+ ex.getAllKindsOfValues(1).length + "枚のアルバム 全"
-					+ table.getNumberOfElements() + "曲"
-		);
-		
-		Callback<ListView<ApolloSong>, ListCell<ApolloSong>> callback = list -> {
-			return new ListCell<>() {
-				@Override
-				protected void updateItem(ApolloSong item, boolean empty) {
-					super.updateItem(item, empty);
-					if (empty || item == null) {
-						setText(null);
-						setGraphic(null);
-					} else {
-						setText(item.toString());
-						setTooltip(new Tooltip(item.getArtist()
-								+ "\n\t- " + item.getAlbum()
-								+ " ( track" + item.getTrack() + " )"
-						));
-					}
+			Extractor ex = Extractor.getExtractor(table);
+			Platform.runLater( () -> {
+				ObservableList<String> list_tab1 = FXCollections.observableArrayList();
+				for (String s : ex.getAllKindsOfValues(0)) {
+					list_tab1.add(s);
 				}
-			};
-		};
-		songList_tab1.setCellFactory(callback);
-		songList_tab2.setCellFactory(callback);
-		songList_tab3.setCellFactory(callback);
-		songList_tab4.setCellFactory(callback);
-		playListView.setCellFactory(callback);
+				Collections.sort(list_tab1, (str1, str2) -> {
+					String cache1 = str1;
+					String cache2 = str2;
+					if (str1.toLowerCase().startsWith("the ")) {
+						cache1 = str1.substring(4);
+					}
+					if (str2.toLowerCase().startsWith("the ")) {
+						cache2 = str2.substring(4);
+					}
+					return Collator.getInstance().compare(cache1, cache2);
+				});
+				this.artistList_tab1.setItems(list_tab1);
+				this.artistList_tab3.setItems(list_tab1);
+				
+				ObservableList<String> list_tab2 = FXCollections.observableArrayList();
+				for (String s : ex.getAllKindsOfValues(1)) {
+					list_tab2.add(s);
+				}
+				Collections.sort(list_tab2);
+				this.albumList_tab2.setItems(list_tab2);
+				
+				ObservableList<ApolloSong> list_tab4 = FXCollections.observableArrayList();
+				for (ApolloSong song : songs) {
+					list_tab4.add(song);
+				}
+				Collections.sort(list_tab4, (song1, song2) -> {
+					return Collator.getInstance().compare(song1.getTitle(), song2.getTitle());
+				});
+				this.songList_tab4.setItems(list_tab4);
+				
+				titleLabel.textProperty().bind(PlayerManager.currentSongTitleProperty());
+				Tooltip tooltip = new Tooltip();
+				tooltip.textProperty().bind(titleLabel.textProperty());
+				titleLabel.setTooltip(tooltip);
+				
+				artistLabel.textProperty().bind(PlayerManager.currentSongArtistProperty());
+				tooltip = new Tooltip();
+				tooltip.textProperty().bind(artistLabel.textProperty());
+				artistLabel.setTooltip(tooltip);
+				
+				albumLabel.textProperty().bind(PlayerManager.currentSongAlbumProperty());
+				tooltip = new Tooltip();
+				tooltip.textProperty().bind(albumLabel.textProperty());
+				albumLabel.setTooltip(tooltip);
+				
+				rangeSlider.lowValueProperty().addListener( (value, oldValue, newValue) -> {
+					PlayerManager.setStartTime(newValue.doubleValue());
+				});
+				rangeSlider.highValueProperty().addListener( (value, oldValue, newValue) -> {
+					PlayerManager.setStopTime(newValue.doubleValue());
+				});
+				
+				playListView.itemsProperty().bind(PlayerManager.playListProperty());
+				
+				numberOfMusicLabel.setText(
+					ex.getAllKindsOfValues(0).length + "人のアーティスト "
+							+ ex.getAllKindsOfValues(1).length + "枚のアルバム 全"
+							+ table.getNumberOfElements() + "曲"
+				);
+				
+				Callback<ListView<ApolloSong>, ListCell<ApolloSong>> callback = list -> {
+					return new ListCell<>() {
+						@Override
+						protected void updateItem(ApolloSong item, boolean empty) {
+							super.updateItem(item, empty);
+							if (empty || item == null) {
+								setText(null);
+								setGraphic(null);
+							} else {
+								setText(item.toString());
+								setTooltip(new Tooltip(item.getArtist()
+										+ "\n\t- " + item.getAlbum()
+										+ " ( track" + item.getTrack() + " )"
+								));
+							}
+						}
+					};
+				};
+				songList_tab1.setCellFactory(callback);
+				songList_tab2.setCellFactory(callback);
+				songList_tab3.setCellFactory(callback);
+				songList_tab4.setCellFactory(callback);
+				playListView.setCellFactory(callback);
+			});
+		}).start();
 	}
 	
 	@FXML

@@ -23,18 +23,17 @@ public class Main extends Application {
 			stage.setMaximized(true);
 			stage.setTitle("Apollo Music Player");
 			stage.show();
-			
-//			-splash:data/splash.png
-			SplashScreen splash = SplashScreen.getSplashScreen();
-			if(splash != null) {
-				splash.close();
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public static void main(String[] args) {
+//		-splash:data/splash.png
+		SplashScreen splash = SplashScreen.getSplashScreen();
+		if (splash != null) {
+			splash.close();
+		}
 		launch();
 	}
 }
